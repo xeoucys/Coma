@@ -1,0 +1,7 @@
+/* 공통 스타일 (담당: 서유정) - 학생 화면은 휴대폰 기준 */
+
+.container {
+    max-width: 480px; /* 휴대폰 폭 정도로 제한 */
+    margin: 0 auto;   /* PC에서는 가운데 정렬 */
+    padding: 16px;
+}

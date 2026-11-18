@@ -1,0 +1,4 @@
+# 이 파일을 복사해서 application-local.properties로 이름을 바꾸고
+# 자기 MySQL 계정 정보로 수정한다. (application-local.properties는 Git에 올라가지 않음)
+spring.datasource.username=root
+spring.datasource.password=여기에_비밀번호

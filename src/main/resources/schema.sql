@@ -1,0 +1,10 @@
+-- 테이블 생성 SQL (담당: 변연경)
+--
+-- TODO 1순위 테이블
+-- event        : 행사 번호, 행사 이름, 오픈 시간, 마감 시간, 마감 여부
+-- event_option : 옵션 번호, 행사 번호, 옵션 이름, 정원, 남은 수량
+--                (option은 MySQL 예약어라서 event_option으로 함)
+-- application  : 신청 번호, 행사 번호, 옵션 번호, 학번, 이름, 전화번호, 수령일, 신청 시각
+--                UNIQUE (event_id, student_id)  ← 중복 신청 방지
+--
+-- 수령일 저장 방식(예: event_pickup_date 테이블)도 여기서 정한다.

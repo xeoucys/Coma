@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>간식 신청</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <!-- 행사 상세, 신청 화면 (담당: 서유정) -->
+    <main class="container">
+        <h1 id="event-name">행사 이름</h1>
+
+        <!-- TODO: 옵션별 남은 수량, 품절 표시 -->
+        <section id="options"></section>
+
+        <!-- TODO: 신청 폼 (학번, 이름, 전화번호, 옵션, 수령일) -->
+        <form id="apply-form"></form>
+
+        <!-- TODO: 신청 결과, 오류 메시지 -->
+        <p id="message"></p>
+    </main>
+
+    <script src="js/api.js"></script>
+    <script src="js/socket.js"></script>
+    <script src="js/event.js"></script>
+</body>
+</html>
