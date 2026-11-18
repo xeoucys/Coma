@@ -35,7 +35,7 @@ flowchart LR
         C -- "수량 변경 알림 요청" --> WS
     end
 
-    DB[("MySQL<br/>event, event_option,<br/>application, member")]
+    DB[("MariaDB<br/>event, event_option,<br/>application, member")]
 
     Client -- "HTTP 요청 / 응답 (JSON)" --> C
     WS -. "WebSocket 수량 알림" .-> Client
@@ -55,7 +55,7 @@ flowchart LR
 | Service | 오지우 | 신청 조건 검사, 트랜잭션 관리, 행사 상태(오픈 전/진행 중/마감) 계산 | SQL 직접 작성, 화면 처리 |
 | WebSocket Handler | 오지우 | 접속자 목록 관리, 수량·마감 메시지 브로드캐스트 | DB 접근 |
 | DAO | 변연경 | SQL 실행, 결과를 DTO로 변환 | 신청 규칙 판단 |
-| DB (MySQL) | 변연경 | 데이터 저장, UNIQUE·FK 제약으로 잘못된 데이터 차단 | |
+| DB (MariaDB) | 변연경 | 데이터 저장, UNIQUE·FK 제약으로 잘못된 데이터 차단 | |
 
 ## 2-3. 클래스 다이어그램
 
@@ -270,7 +270,7 @@ sequenceDiagram
     participant C as EventController
     participant S as EventService
     participant D as EventDao / OptionDao
-    participant DB as MySQL
+    participant DB as MariaDB
 
     B->>C: GET /api/events/{eventId}
     C->>S: getEventDetail(eventId)
@@ -294,7 +294,7 @@ sequenceDiagram
     participant C as ApplyController
     participant S as ApplyService
     participant D as DAO
-    participant DB as MySQL
+    participant DB as MariaDB
     participant N as StockNotifier / Handler
 
     B2->>N: 페이지 열 때 WebSocket 연결 (/ws/stock)

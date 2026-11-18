@@ -17,16 +17,16 @@
 - Java 17, Spring Boot 3.5
 - HTML, CSS, JavaScript
 - WebSocket
-- MySQL, JdbcTemplate
+- MariaDB, JdbcTemplate
 - Gradle
 
 ## 처음 실행하기
 
-1. MySQL에 DB를 만든다.
+1. MariaDB에 DB를 만들고, `schema.sql`과 `data.sql`을 순서대로 실행한다. (HeidiSQL 등)
    ```sql
-   CREATE DATABASE snack DEFAULT CHARACTER SET utf8mb4;
+   CREATE DATABASE coma_db DEFAULT CHARACTER SET utf8mb4;
    ```
-2. `src/main/resources/application-local.properties.example`을 복사해서 같은 폴더에 `application-local.properties`로 저장하고, 자기 MySQL 아이디와 비밀번호를 적는다. (이 파일은 Git에 올라가지 않는다)
+2. `src/main/resources/application-local.properties.example`을 복사해서 같은 폴더에 `application-local.properties`로 저장하고, 자기 MariaDB 아이디와 비밀번호를 적는다. (이 파일은 Git에 올라가지 않는다)
 3. Eclipse에서 **File → Import → Gradle → Existing Gradle Project**로 이 폴더를 연다.
 4. `SnackApplication.java`를 우클릭하고 **Run As → Spring Boot App** (또는 Java Application)으로 실행한다.
 5. 브라우저에서 `http://localhost:8080` 에 접속한다.

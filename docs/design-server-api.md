@@ -228,7 +228,7 @@ UPDATE event_option
 SET remaining = remaining - 1
 WHERE option_id = ? AND remaining > 0;
 ```
-- `remaining > 0` 검사와 차감을 SQL 한 문장으로 처리한다. MySQL은 같은 행을 바꾸는 UPDATE를 한 번에 하나씩 처리하므로, 마지막 1개에 10명이 동시에 요청해도 1명만 바뀐 행 1개를 받고 나머지 9명은 0개를 받는다.
+- `remaining > 0` 검사와 차감을 SQL 한 문장으로 처리한다. MariaDB은 같은 행을 바꾸는 UPDATE를 한 번에 하나씩 처리하므로, 마지막 1개에 10명이 동시에 요청해도 1명만 바뀐 행 1개를 받고 나머지 9명은 0개를 받는다.
 - 바뀐 행이 0개면 `SOLD_OUT`으로 처리한다.
 
 **2) 신청 저장: UNIQUE 제약**
