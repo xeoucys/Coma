@@ -7,18 +7,19 @@
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-    <!-- 행사 상세, 신청 화면 (담당: 서유정) -->
+    <!-- 간식 신청 (1순위, 담당: 서유정) - UI: event.html -->
     <main class="container">
-        <h1 id="event-name">행사 이름</h1>
+        <!-- TODO: 행사 안내문 -->
+        <section id="event-info"></section>
 
-        <!-- TODO: 옵션별 남은 수량, 품절 표시 -->
-        <section id="options"></section>
-
-        <!-- TODO: 신청 폼 (학번, 이름, 전화번호, 옵션, 수령일) -->
-        <form id="apply-form"></form>
-
-        <!-- TODO: 신청 결과, 오류 메시지 -->
-        <p id="message"></p>
+        <!-- TODO: 신청 폼
+             - 학번, 이름, 전화번호 입력
+             - 옵션 선택 (하나만 고르므로 라디오 버튼, 품절 옵션은 선택 불가)
+             - 수령일 선택
+             GET /api/events/{eventId} 응답의 options, pickupDates로 선택지를 만든다 -->
+        <form id="apply-form">
+            <button type="submit" id="apply-button">간식 신청하기</button>
+        </form>
     </main>
 
     <script src="js/api.js"></script>

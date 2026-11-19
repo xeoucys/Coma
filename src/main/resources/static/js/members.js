@@ -1,0 +1,3 @@
+// 납부자 명단 등록 (2순위)
+//
+// TODO: docs/design-system-structure.md 2-4 페이지 목록 참고

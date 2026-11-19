@@ -7,10 +7,10 @@
 | 항목 | 결정 | 이유 |
 | --- | --- | --- |
 | 화면 구현 방식 | HTML + JavaScript, 서버와는 JSON으로 데이터만 주고받음 | 화면 담당과 서버 담당이 API 명세만 맞추면 따로 개발할 수 있음. WebSocket으로 받은 수량을 JavaScript로 바로 화면에 반영해야 해서 어차피 JavaScript가 필요함 |
-| DB 접근 방식 | JdbcTemplate | 수업에서 배운 JDBC + DAO 방식과 가장 비슷함 |
+| DB | MariaDB (`coma_db`), JdbcTemplate | 실습 때 설치한 MariaDB 사용. JdbcTemplate은 수업에서 배운 JDBC + DAO 방식과 가장 비슷함 |
 | 실시간 통신 | Spring WebSocket (TextWebSocketHandler) | 수업에서 배운 소켓 브로드캐스트(접속자 목록에 차례로 보내기)와 구조가 같음 |
 | 동시 신청 처리 | DB 조건부 UPDATE + @Transactional + UNIQUE 제약 | 정원 검사와 차감을 DB가 한 번에 처리해서 정원 초과가 생기지 않음 |
-| 관리자 접근 제한 | 비밀번호 확인 후 세션에 관리자 표시, 인터셉터로 관리자 API 검사 | 학생 로그인 없이 관리자만 보호하면 됨 |
+| 관리자 접근 제한 | 관리자 아이디·비밀번호 로그인 후 세션에 관리자 표시, 인터셉터로 관리자 API 검사 | UI 설계(login.html, signin.html) 기준. 학생 로그인 없이 관리자만 보호하면 됨 |
 
 ---
 
@@ -40,8 +40,8 @@
 
 | 순위 | 기능 | 방식 | URL | 요구사항 |
 | --- | --- | --- | --- | --- |
-| 1 | 행사 목록 조회 | GET | `/api/events` | R1 |
-| 1 | 행사 상세, 옵션별 남은 수량 조회 | GET | `/api/events/{eventId}` | R2, R4 |
+| 1 | 행사 목록과 옵션별 남은 수량 조회 (`index.html`) | GET | `/api/events` | R1, R2 |
+| 1 | 신청 화면용 행사 정보: 옵션, 남은 수량, 수령일 (`event.html`) | GET | `/api/events/{eventId}` | R3, R4 |
 | 1 | 신청 | POST | `/api/events/{eventId}/applications` | R3~R5, R18~R23, R27~R32 |
 | 2 | 내 신청 내역 조회 | GET | `/api/applications?studentId=...&name=...` | R6 |
 
@@ -53,10 +53,16 @@
     "name": "기말고사 간식 행사",
     "openAt": "2026-12-09T12:00:00",
     "closeAt": "2026-12-10T18:00:00",
-    "status": "OPEN"
+    "status": "OPEN",
+    "options": [
+      { "optionId": 1, "name": "논비건 버거", "remaining": 12 },
+      { "optionId": 2, "name": "비건 버거", "remaining": 0 }
+    ]
   }
 ]
 ```
+- 행사 카드 목록(`index.html`)에 쓴다. 행사마다 옵션별 남은 수량을 함께 보낸다.
+- `status`는 카드의 상태 표시에 쓴다. `OPEN` = 신청 가능, `UPCOMING` = 진행 예정, `CLOSED` = 신청 마감
 
 **GET /api/events/{eventId}** 응답 200
 ```json
@@ -73,7 +79,8 @@
   ]
 }
 ```
-- `remaining`이 0이면 화면에서 품절로 표시한다.
+- 신청 화면(`event.html`)에 쓴다. 옵션 선택지와 수령일 선택지를 이 응답으로 만든다.
+- `remaining`이 0인 옵션은 품절로 표시하고 선택할 수 없게 한다.
 - `status`가 `UPCOMING`이면 신청 버튼을 막고 오픈 시각을 보여준다.
 
 **POST /api/events/{eventId}/applications** 요청
@@ -123,11 +130,12 @@
 
 ### 관리자 API
 
-`/api/admin/login`을 제외한 모든 관리자 API는 로그인한 관리자만 호출할 수 있다. (4-7)
+`/api/admin/login`, `/api/admin/signup`을 제외한 모든 관리자 API는 로그인한 관리자만 호출할 수 있다. (4-7)
 
 | 순위 | 기능 | 방식 | URL | 요청 | 요구사항 |
 | --- | --- | --- | --- | --- | --- |
-| 3 | 로그인 | POST | `/api/admin/login` | `{ "password": "..." }` | R16, R35 |
+| 3 | 회원가입 (`signin.html`) | POST | `/api/admin/signup` | `{ "loginId": "...", "password": "..." }` | |
+| 3 | 로그인 (`login.html`) | POST | `/api/admin/login` | `{ "loginId": "...", "password": "..." }` | R16, R35 |
 | 3 | 로그아웃 | POST | `/api/admin/logout` | | |
 | - | 행사 생성 | POST | `/api/admin/events` | 아래 예시 | R7~R9, R34 |
 | 3 | 행사 삭제 | DELETE | `/api/admin/events/{eventId}` | | R15 |
@@ -185,6 +193,7 @@ flowchart TD
     I -- "바뀐 행 0개" --> E7[SOLD_OUT<br/>롤백]
     I -- "바뀐 행 1개" --> J{신청 INSERT 성공?}
     J -- "UNIQUE 위반" --> E6B[DUPLICATE<br/>롤백, 차감 취소]
+    J -- "외래키 위반" --> E8[INVALID_INPUT<br/>롤백, 차감 취소]
     J -- 성공 --> K[[커밋]]
     K --> L([성공 응답 + WebSocket 수량 알림])
     L --> M{행사의 모든 옵션이 품절?}
@@ -195,6 +204,7 @@ flowchart TD
 - R18의 순서(신청 기간 → 납부 여부 → 중복 → 남은 수량)를 그대로 따른다.
 - 입력값 검사는 Controller에서 하고, 그 뒤 `ApplyService.apply()`가 시작되면서 트랜잭션이 시작된다. 중간에 실패하면 `ApplyException`을 던지고, 트랜잭션은 롤백된다.
 - 납부 여부 확인(G)은 2순위 기능이다. 1순위에서는 이 단계를 건너뛴다.
+- 1순위에서 G를 건너뛰어도, `application.student_id`가 `member`를 참조하므로 납부자가 아닌 학번은 신청 저장(J)에서 외래키 위반이 난다. 그 행사에 없는 수령일을 보낸 경우도 같다. 외래키 위반(`DataIntegrityViolationException`)은 `INVALID_INPUT`으로 응답한다. 2순위에서 G를 넣으면 납부자가 아닌 학번은 `NOT_MEMBER`로 먼저 걸러진다.
 - H(중복 확인)는 친절한 안내를 빨리 보내기 위한 1차 검사이다. 같은 학생이 두 탭에서 동시에 신청하면 H를 둘 다 통과할 수 있으므로, 최종적으로는 DB의 UNIQUE 제약(J)이 막는다.
 
 ### 실패 응답 코드 (ErrorCode)
@@ -207,11 +217,13 @@ flowchart TD
 | `OPTION_NOT_FOUND` | 404 | 존재하지 않는 메뉴입니다. | |
 | `NOT_OPEN` | 409 | 아직 신청 기간이 아닙니다. | R27 |
 | `CLOSED` | 409 | 마감된 행사입니다. | R32 |
-| `NOT_MEMBER` | 403 | 학생회비 미납부자입니다. | R28 |
+| `NOT_MEMBER` | 403 | 컴퓨터공학과 학생회비 미납부자입니다. | R28 |
+| `INVALID_STUDENT` | 403 | 존재하지 않는 학번이거나, 이름과 학번이 대응되지 않습니다. | 2순위 |
 | `DUPLICATE` | 409 | 이미 신청한 행사입니다. | R29 |
 | `SOLD_OUT` | 409 | 품절된 메뉴입니다. | R30, R31 |
 | `INVALID_CAPACITY` | 400 | 정원은 1 이상이어야 합니다. | R34 |
-| `ADMIN_AUTH_FAILED` | 401 | 비밀번호가 올바르지 않습니다. | R35 |
+| `ADMIN_AUTH_FAILED` | 401 | 아이디 또는 비밀번호가 올바르지 않습니다. | R35 |
+| `DUPLICATE_LOGIN_ID` | 409 | 이미 사용 중인 아이디입니다. | |
 | `ADMIN_REQUIRED` | 401 | 관리자 로그인이 필요합니다. | |
 | `SERVER_ERROR` | 500 | 잠시 후 다시 시도해주세요. | |
 
@@ -228,12 +240,12 @@ UPDATE event_option
 SET remaining = remaining - 1
 WHERE option_id = ? AND remaining > 0;
 ```
-- `remaining > 0` 검사와 차감을 SQL 한 문장으로 처리한다. MariaDB은 같은 행을 바꾸는 UPDATE를 한 번에 하나씩 처리하므로, 마지막 1개에 10명이 동시에 요청해도 1명만 바뀐 행 1개를 받고 나머지 9명은 0개를 받는다.
+- `remaining > 0` 검사와 차감을 SQL 한 문장으로 처리한다. MariaDB(InnoDB)는 UPDATE하는 행에 잠금을 걸어 같은 행을 바꾸는 요청을 한 번에 하나씩 처리하므로, 마지막 1개에 10명이 동시에 요청해도 1명만 바뀐 행 1개를 받고 나머지 9명은 0개를 받는다.
 - 바뀐 행이 0개면 `SOLD_OUT`으로 처리한다.
 
 **2) 신청 저장: UNIQUE 제약**
 ```sql
-UNIQUE (event_id, student_id)
+UNIQUE (student_id, event_id)  -- DB 설계의 UK_APPLICATION_STUDENT_EVENT
 ```
 - 같은 학생이 같은 행사에 두 번 저장되는 것을 DB가 막는다. 위반되면 `DuplicateKeyException`이 발생하고, 이를 `DUPLICATE`로 바꿔 응답한다.
 
@@ -260,7 +272,8 @@ UNIQUE (event_id, student_id)
 | 정원만큼 성공 | 정원 5인 옵션, 10명 동시 신청 | 성공 5명, 남은 수량 0, 신청 행 5개 |
 | 동시 중복 신청 | 같은 학번으로 스레드 5개가 동시에 신청 | 성공 1번, `DUPLICATE` 4번, 남은 수량 1만 줄어듦 |
 
-여러 스레드를 동시에 출발시키는 데는 `CountDownLatch`를 사용한다.
+- 여러 스레드를 동시에 출발시키는 데는 `CountDownLatch`를 사용한다.
+- 테스트에 쓰는 학번은 `member` 테이블에 미리 등록해 둔다. (등록되지 않은 학번은 외래키 위반으로 저장되지 않음)
 
 ## 4-5. 옵션 품절 / 행사 마감 처리
 
@@ -293,7 +306,7 @@ UNIQUE (event_id, student_id)
 
 **연결 정보**
 - 주소: `ws://서버주소/ws/stock`
-- 학생 행사 페이지와 관리자 명단 페이지가 열릴 때 연결한다.
+- 행사 목록(`index.html`), 간식 신청(`event.html`), 신청자 관리(`applicants.html`) 페이지가 열릴 때 연결한다.
 - 서버는 모든 접속자에게 같은 메시지를 보내고, 화면은 자기가 보고 있는 `eventId`의 메시지만 반영한다. (1순위에서는 행사가 하나뿐이라 단순하게 처리)
 
 **메시지 형식** (서버 → 브라우저, JSON)
@@ -306,8 +319,12 @@ UNIQUE (event_id, student_id)
 브라우저 → 서버로 보내는 메시지는 없다. 신청은 항상 HTTP API로 한다.
 
 **화면 처리**
-- `STOCK`: 해당 옵션의 남은 수량을 바꾸고, 0이면 품절 표시와 버튼 비활성화
-- `CLOSED`: 신청 버튼 전체 비활성화, "마감된 행사입니다." 표시
+- `STOCK`
+  - `index.html`: 카드에서 해당 옵션의 남은 수량을 바꾸고, 0이면 품절 표시
+  - `event.html`: 해당 옵션의 남은 수량을 바꾸고, 0이면 그 옵션을 선택할 수 없게 함
+- `CLOSED`
+  - `index.html`: 해당 카드를 "신청 마감" 상태로 표시
+  - `event.html`: 신청 버튼 비활성화, "마감된 행사입니다." 표시
 
 **연결 끊김 처리** (R26, R33)
 
@@ -315,17 +332,18 @@ UNIQUE (event_id, student_id)
 | --- | --- |
 | 서버 | 연결이 끊긴 세션은 `afterConnectionClosed`, `handleTransportError`에서 접속자 목록에서 지운다. 한 세션에 보내다 오류가 나도 다른 세션에는 계속 보낸다. |
 | 화면 | `onclose`가 발생하면 "서버와 연결이 끊어졌습니다." 안내를 보여주고, 3초마다 다시 연결을 시도한다. |
-| 화면 | 다시 연결되면 `GET /api/events/{eventId}`로 최신 수량을 다시 불러온다. 끊겨 있는 동안 놓친 알림이 있을 수 있기 때문이다. |
+| 화면 | 다시 연결되면 최신 수량을 다시 불러온다. `index.html`은 `GET /api/events`, `event.html`은 `GET /api/events/{eventId}`를 호출한다. 끊겨 있는 동안 놓친 알림이 있을 수 있기 때문이다. |
 | 화면 | 신청 요청 자체가 실패하면(네트워크 오류) "신청 결과를 확인하지 못했습니다. 신청 내역에서 확인해주세요." 안내를 보여준다. |
 
 ## 4-7. 관리자 페이지 접근 제한
 
 **처리 방식: 세션**
-1. 관리자가 `admin/login.html`에서 비밀번호를 입력하면 `POST /api/admin/login`을 호출한다.
-2. 서버는 `application-local.properties`의 `app.admin.password` 값과 비교한다. (비밀번호는 코드와 GitHub에 올리지 않는다)
-3. 맞으면 세션에 `ADMIN = true`를 저장하고 200을 보낸다. 틀리면 401 `ADMIN_AUTH_FAILED`를 보낸다.
-4. `AdminInterceptor`가 `/api/admin/**` 요청마다 세션의 `ADMIN` 값을 확인하고, 없으면 401 `ADMIN_REQUIRED`를 보낸다. (`/api/admin/login`은 검사에서 제외)
-5. 관리자 HTML 페이지는 열 때 관리자 API를 호출하고, 401을 받으면 `admin/login.html`로 이동한다.
+0. 관리자는 `signin.html`에서 아이디와 비밀번호로 계정을 만든다(`POST /api/admin/signup`). 서버는 비밀번호를 그대로 저장하지 않고 해시로 바꿔 `admin` 테이블에 저장한다. 같은 아이디가 있으면 409 `DUPLICATE_LOGIN_ID`를 보낸다.
+1. 관리자가 `login.html`에서 아이디와 비밀번호를 입력하면 `POST /api/admin/login`을 호출한다.
+2. 서버는 `admin` 테이블에서 아이디로 계정을 찾고, 입력한 비밀번호를 해시로 바꿔 저장된 값과 비교한다.
+3. 맞으면 세션에 `ADMIN = true`를 저장하고 200을 보낸다. 틀리면 401 `ADMIN_AUTH_FAILED`를 보낸다. (아이디와 비밀번호 중 무엇이 틀렸는지는 알려주지 않는다)
+4. `AdminInterceptor`가 `/api/admin/**` 요청마다 세션의 `ADMIN` 값을 확인하고, 없으면 401 `ADMIN_REQUIRED`를 보낸다. (`/api/admin/login`, `/api/admin/signup`은 검사에서 제외)
+5. 관리자 HTML 페이지는 열 때 관리자 API를 호출하고, 401을 받으면 `login.html`로 이동한다.
 
 - 화면 파일(HTML) 자체가 아니라 데이터를 주는 API를 막는 방식이다. 학생이 관리자 페이지 주소를 직접 입력해도, 화면 틀만 보이고 데이터는 받을 수 없으며 곧바로 로그인 페이지로 이동한다.
 - 로그아웃하면 세션을 지운다. (`session.invalidate()`)
@@ -338,5 +356,9 @@ UNIQUE (event_id, student_id)
 | --- | --- | --- |
 | 행사 생성 | 1~3순위 목록에 행사 생성(R7~R9)이 없음. 1순위는 `data.sql`로 테스트 행사를 넣고, 관리자 행사 생성을 몇 순위로 할지 정해야 함 | 변연경, 서유정 |
 | 신청자 명단, 집계 | R11, R12, R24, R25도 순위 목록에 없음. 시연에 필요하므로 2순위에 넣는 것을 제안 | 전체 |
-| 수령 일자 | 학생이 고를 수령일을 어디에 저장할지 (예: `event_pickup_date` 테이블) DB 설계에서 정해야 함. API는 `pickupDates` 배열로 주고받음 | 변연경 |
-| 관리자 비밀번호 | `application-local.properties`에 `app.admin.password`를 각자 추가해야 함 | 전체 |
+| 수령 일자 | (해결) DB 설계에서 `event_pickup_date` 테이블로 결정. API는 `pickupDates` 배열로 주고받음 | 변연경 |
+| 학번·이름 확인 | `INVALID_STUDENT`(2순위)를 처리하려면 학번과 이름을 함께 확인하는 `MemberDao.exists(studentId, name)`가 필요함 | 변연경 |
+| 관리자 계정 테이블 | UI 설계에 아이디·비밀번호 로그인과 회원가입이 있어 `admin` 테이블(관리자 번호, 아이디, 비밀번호 해시)이 필요함. DB 설계에는 아직 없음 | 변연경 |
+| 회원가입 제한 | 회원가입을 아무나 할 수 있으면 학생도 관리자가 될 수 있음. 가입 코드 입력, 또는 회원가입 없이 관리자 계정을 `data.sql`로 넣는 방법 중 결정 필요 | 전체 |
+| 요구사항 R16 | "관리자는 비밀번호를 입력하여" → "관리자는 아이디와 비밀번호를 입력하여"로 수정 필요 | 전체 |
+| 행사 생성 화면 | `event-management.html`이 설문지 만들기(제목, 단답, 객관식)처럼 그려져 있음. DB에 저장할 수 있는 항목은 행사 이름, 신청 기간, 수령일, 옵션과 정원이므로 화면 항목을 이에 맞춰야 함 | 서유정, 변연경 |

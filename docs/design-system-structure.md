@@ -7,10 +7,10 @@
 | 항목 | 결정 | 이유 |
 | --- | --- | --- |
 | 화면 구현 방식 | HTML + JavaScript, 서버와는 JSON으로 데이터만 주고받음 | 화면 담당과 서버 담당이 API 명세만 맞추면 따로 개발할 수 있음. WebSocket으로 받은 수량을 JavaScript로 바로 화면에 반영해야 해서 어차피 JavaScript가 필요함 |
-| DB 접근 방식 | JdbcTemplate | 수업에서 배운 JDBC + DAO 방식과 가장 비슷함 |
+| DB | MariaDB (`coma_db`), JdbcTemplate | 실습 때 설치한 MariaDB 사용. JdbcTemplate은 수업에서 배운 JDBC + DAO 방식과 가장 비슷함 |
 | 실시간 통신 | Spring WebSocket (TextWebSocketHandler) | 수업에서 배운 소켓 브로드캐스트(접속자 목록에 차례로 보내기)와 구조가 같음 |
 | 동시 신청 처리 | DB 조건부 UPDATE + @Transactional + UNIQUE 제약 | 정원 검사와 차감을 DB가 한 번에 처리해서 정원 초과가 생기지 않음 |
-| 관리자 접근 제한 | 비밀번호 확인 후 세션에 관리자 표시, 인터셉터로 관리자 API 검사 | 학생 로그인 없이 관리자만 보호하면 됨 |
+| 관리자 접근 제한 | 관리자 아이디·비밀번호 로그인 후 세션에 관리자 표시, 인터셉터로 관리자 API 검사 | UI 설계(login.html, signin.html) 기준. 학생 로그인 없이 관리자만 보호하면 됨 |
 
 ---
 
@@ -21,8 +21,8 @@
 flowchart LR
     subgraph Client["클라이언트 (웹 브라우저)"]
         direction TB
-        S["학생 페이지<br/>index.html, event.html"]
-        A["관리자 페이지<br/>admin/*.html"]
+        S["학생 페이지<br/>index.html, event.html, my.html"]
+        A["관리자 페이지<br/>login.html, signin.html,<br/>applicants.html, event-management.html"]
     end
 
     subgraph Server["Spring Boot 서버"]
@@ -35,7 +35,7 @@ flowchart LR
         C -- "수량 변경 알림 요청" --> WS
     end
 
-    DB[("MariaDB<br/>event, event_option,<br/>application, member")]
+    DB[("MariaDB (coma_db)<br/>event, event_pickup_date,<br/>event_option, member,<br/>application, admin")]
 
     Client -- "HTTP 요청 / 응답 (JSON)" --> C
     WS -. "WebSocket 수량 알림" .-> Client
@@ -79,6 +79,7 @@ classDiagram
     class AdminController {
         -AdminService adminService
         -EventService eventService
+        +signup(AdminSignupRequest req)
         +login(AdminLoginRequest req, HttpSession session)
         +logout(HttpSession session)
         +createEvent(EventCreateRequest req) Long
@@ -108,10 +109,11 @@ classDiagram
         +getMyApplications(String studentId, String name) List~ApplicationDto~
     }
     class AdminService {
-        -String adminPassword
+        -AdminDao adminDao
         -ApplicationDao applicationDao
         -MemberDao memberDao
-        +checkPassword(String password) boolean
+        +signup(AdminSignupRequest req)
+        +login(String loginId, String password) boolean
         +registerMembers(List~MemberDto~ members)
         +getApplications(Long eventId) List~ApplicationDto~
         +getSummary(Long eventId) List~SummaryDto~
@@ -162,7 +164,13 @@ classDiagram
     }
     class MemberDao {
         +exists(String studentId) boolean
+        +exists(String studentId, String name) boolean
         +insertAll(List~MemberDto~ members)
+    }
+    class AdminDao {
+        +findByLoginId(String loginId) AdminDto
+        +existsByLoginId(String loginId) boolean
+        +insert(String loginId, String passwordHash)
     }
 
     EventController --> EventService
@@ -179,6 +187,7 @@ classDiagram
     ApplyService --> MemberDao
     AdminService --> ApplicationDao
     AdminService --> MemberDao
+    AdminService --> AdminDao
 
     EventCloseScheduler --> EventDao
     EventCloseScheduler --> StockNotifier
@@ -206,8 +215,8 @@ classDiagram
 | DTO | 필드 | 사용처 |
 | --- | --- | --- |
 | `EventDto` | eventId, name, openAt, closeAt, closed | DAO ↔ Service |
-| `EventSummaryDto` | eventId, name, openAt, closeAt, status | 행사 목록 응답 |
-| `EventDetailDto` | eventId, name, openAt, closeAt, status, pickupDates, options | 행사 상세 응답 |
+| `EventSummaryDto` | eventId, name, openAt, closeAt, status, options | 행사 목록 응답 (`index.html` 카드) |
+| `EventDetailDto` | eventId, name, openAt, closeAt, status, pickupDates, options | 신청 화면용 응답 (`event.html`) |
 | `OptionDto` | optionId, eventId, name, capacity, remaining | 옵션 정보 |
 | `ApplyRequest` | studentId, name, phone, optionId, pickupDate | 신청 요청 |
 | `ApplyResponse` | success, code, message, applicationId, optionId, remaining, eventClosed | 신청 결과 |
@@ -215,7 +224,9 @@ classDiagram
 | `MemberDto` | studentId, name | 납부자 등록 |
 | `SummaryDto` | optionId, optionName, count | 옵션별 집계 |
 | `StockMessage` | type, eventId, optionId, remaining | WebSocket 메시지 |
-| `AdminLoginRequest` | password | 관리자 로그인 |
+| `AdminLoginRequest` | loginId, password | 관리자 로그인 |
+| `AdminSignupRequest` | loginId, password | 관리자 회원가입 |
+| `AdminDto` | adminId, loginId, passwordHash | AdminDao ↔ AdminService |
 | `EventCreateRequest` | name, openAt, closeAt, pickupDates, options(name, capacity) | 행사 생성 |
 
 DTO 필드 이름은 「4. 서버 및 통신」 문서의 API 명세(4-2)에 나오는 JSON 이름과 같게 한다. 화면, 서버, DB 담당이 같은 이름을 쓰기 위해서다.
@@ -230,32 +241,48 @@ snack/
 │   ├── controller/    EventController, ApplyController, AdminController
 │   ├── service/       EventService, ApplyService, AdminService, EventCloseScheduler
 │   ├── websocket/     StockWebSocketHandler, StockNotifier
-│   ├── dao/           EventDao, OptionDao, ApplicationDao, MemberDao
+│   ├── dao/           EventDao, OptionDao, ApplicationDao, MemberDao, AdminDao
 │   ├── dto/           (2-3의 DTO 표 참고), EventStatus
 │   └── exception/     ErrorCode, ApplyException, GlobalExceptionHandler
 ├── src/main/resources/
 │   ├── application.properties
-│   ├── application-local.properties   (Git 제외: DB 비밀번호, 관리자 비밀번호)
+│   ├── application-local.properties   (Git 제외: DB 비밀번호)
 │   ├── schema.sql, data.sql
 │   └── static/
-│       ├── index.html, event.html, my.html
-│       ├── admin/  login.html, events.html, members.html, applicants.html
+│       ├── index.html, event.html, my.html                       (학생)
+│       ├── login.html, signin.html                                 (관리자 계정)
+│       ├── applicants.html, event-management.html, members.html    (관리자)
 │       ├── css/style.css
-│       └── js/  api.js, socket.js, event.js, my.js, admin.js
+│       └── js/  api.js, socket.js, index.js, event.js, my.js,
+│                login.js, signin.js, applicants.js, event-management.js, members.js
 └── src/test/java/com/coma/snack/
     └── service/ApplyServiceTest.java
 ```
 
 - HTML + JavaScript 방식이므로 `templates/`는 쓰지 않고 모든 화면 파일을 `static/`에 둔다.
 - `static/`의 파일은 서버 실행 후 `http://localhost:8080/파일이름`으로 바로 열린다.
+- 화면 파일은 UI 설계의 페이지 이름을 그대로 쓴다. 페이지마다 같은 이름의 JS 파일을 하나씩 두고, 서버 요청은 `api.js`, WebSocket은 `socket.js`에 모은다.
+
+**페이지 목록 (UI 설계 기준)**
+
+| 구분 | 페이지 | 내용 | 순위 |
+| --- | --- | --- | --- |
+| 학생 | `index.html` | 행사 카드 목록: 행사 이름, 신청 기간, 옵션별 남은 수량, 행사 상태 | 1 |
+| 학생 | `event.html` | 간식 신청: 안내문, 학번·이름·전화번호 입력, 옵션·수령일 선택, 신청 버튼 | 1 |
+| 학생 | `my.html` | 신청 내역 조회: 학번·이름 입력 후 신청한 행사, 옵션, 신청 시각, 수령일 표시 | 2 |
+| 관리자 | `login.html` | 관리자 로그인 (아이디, 비밀번호) | 3 |
+| 관리자 | `signin.html` | 관리자 회원가입 (아이디, 비밀번호) | 3 |
+| 관리자 | `applicants.html` | 관리자 행사 목록, 행사 삭제, 행사 생성으로 이동, 신청자 명단·집계·입금 여부·CSV | 2~3 |
+| 관리자 | `event-management.html` | 행사 생성: 행사 이름, 신청 기간, 수령일, 옵션과 정원 | - |
+| 관리자 | `members.html` | 학생회비 납부자 명단 등록 (페이지 목록에는 있고 와이어프레임에는 없음) | 2 |
 
 **우선순위별 파일**
 
 | 순위 | 기능 | 필요한 파일 |
 | --- | --- | --- |
-| 1순위 | 행사 조회, 신청, 정원 차감, 결과 확인, 동시 신청, 실시간 수량 | EventController, ApplyController, EventService, ApplyService, StockNotifier, StockWebSocketHandler, WebSocketConfig, EventDao, OptionDao, ApplicationDao, 관련 DTO, ErrorCode, ApplyException, GlobalExceptionHandler, index.html, event.html, api.js, socket.js, event.js |
-| 2순위 | 납부자 검증, 자동 마감, 신청 내역 조회 | MemberDao, MemberDto, EventCloseScheduler, my.html, my.js |
-| 3순위 | CSV, 입금 관리, 행사 삭제, 관리자 | AdminController, AdminService, AdminInterceptor, WebConfig, admin/*.html, admin.js |
+| 1순위 | 행사 조회, 신청, 정원 차감, 결과 확인, 동시 신청, 실시간 수량 | EventController, ApplyController, EventService, ApplyService, StockNotifier, StockWebSocketHandler, WebSocketConfig, EventDao, OptionDao, ApplicationDao, 관련 DTO, ErrorCode, ApplyException, GlobalExceptionHandler, index.html, event.html, api.js, socket.js, index.js, event.js, style.css |
+| 2순위 | 납부자 검증, 신청자 명단·집계, 자동 마감, 신청 내역 조회 | MemberDao, MemberDto, EventCloseScheduler, my.html, my.js, members.html, members.js, applicants.html, applicants.js |
+| 3순위 | 관리자 로그인·회원가입, 행사 생성, CSV, 입금 관리, 행사 삭제 | AdminController, AdminService, AdminDao, AdminInterceptor, WebConfig, login.html, signin.html, event-management.html와 각 JS |
 
 1순위에는 행사 생성 기능이 없으므로, 테스트용 행사와 옵션은 `data.sql`로 넣는다.
 
@@ -266,31 +293,35 @@ snack/
 ```mermaid
 sequenceDiagram
     autonumber
-    participant B as 브라우저 (event.js)
+    participant B as 브라우저 (index.js)
     participant C as EventController
     participant S as EventService
     participant D as EventDao / OptionDao
     participant DB as MariaDB
 
-    B->>C: GET /api/events/{eventId}
-    C->>S: getEventDetail(eventId)
-    S->>D: findById, findPickupDates, findByEventId
-    D->>DB: SELECT
-    DB-->>D: 행사, 수령일, 옵션
-    D-->>S: EventDto, List<OptionDto>
-    S->>S: 현재 시각으로 상태 계산 (UPCOMING / OPEN / CLOSED)
-    S-->>C: EventDetailDto
-    C-->>B: 200 JSON (옵션별 남은 수량 포함)
-    B->>B: 화면에 옵션, 남은 수량, 품절 표시
+    B->>C: GET /api/events
+    C->>S: getEvents()
+    S->>D: findAll()
+    D->>DB: SELECT event
+    loop 행사마다
+        S->>D: findByEventId(eventId)
+        D->>DB: SELECT event_option
+    end
+    S->>S: 행사마다 상태 계산 (UPCOMING / OPEN / CLOSED)
+    S-->>C: List<EventSummaryDto> (옵션별 남은 수량 포함)
+    C-->>B: 200 JSON
+    B->>B: 카드에 행사 이름, 기간, 옵션별 남은 수량, 상태 표시
 ```
+
+- 학생이 카드를 누르면 `event.html?eventId=번호`로 이동하고, `GET /api/events/{eventId}`로 옵션과 수령일을 받아 신청 폼을 만든다. (흐름은 위와 같고, `getEventDetail()`이 `findById`, `findPickupDates`, `findByEventId`를 호출)
 
 ### 신청과 실시간 수량 전달
 
 ```mermaid
 sequenceDiagram
     autonumber
-    participant B1 as 학생1 브라우저
-    participant B2 as 다른 학생 브라우저
+    participant B1 as 학생1 브라우저 (event.html)
+    participant B2 as 다른 학생 브라우저 (index.html)
     participant C as ApplyController
     participant S as ApplyService
     participant D as DAO

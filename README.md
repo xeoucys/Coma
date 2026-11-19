@@ -50,12 +50,18 @@ src/main/resources/
 ├── application.properties
 ├── application-local.properties.example
 ├── schema.sql, data.sql                                (변연경)
-└── static/       index.html, event.html, css/, js/     (서유정)
+└── static/                                             (서유정)
+    ├── index.html, event.html                          ← 1순위
+    ├── my.html                                         ← 2순위
+    ├── login.html, signin.html, applicants.html,
+    │   event-management.html, members.html             ← 관리자 (2순위 이후)
+    ├── css/style.css
+    └── js/   api.js, socket.js, 페이지별 JS (페이지 이름과 같음)
 
 src/test/java/com/coma/snack/service/ApplyServiceTest   (오지우)
 ```
 
-각 파일의 TODO 주석에 만들어야 할 메서드와 관련 설계 문서 위치가 적혀 있습니다.
+각 파일의 TODO 주석에 만들어야 할 내용과 관련 설계 문서 위치가 적혀 있습니다. 화면 파일 이름은 UI 설계의 페이지 이름과 같습니다.
 
 ## 1순위 기능
 
