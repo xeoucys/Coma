@@ -1,0 +1,7 @@
+-- 테이블 생성 SQL (담당: 변연경)
+-- 각자 MariaDB의 coma_db에서 직접 실행한다. (서버가 자동 실행하지 않음)
+--
+-- TODO DB 설계의 테이블 명세서대로 작성
+-- event, event_pickup_date, event_option, member, application
+-- (option은 예약어라서 event_option으로 함)
+-- 테이블 이름은 소문자로 통일
