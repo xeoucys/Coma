@@ -1,4 +1,4 @@
-package com.coma.snack;
+package com.coma.snack.config;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
