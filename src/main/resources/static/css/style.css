@@ -1,7 +1,88 @@
 /* 공통 스타일 (담당: 서유정) - 학생 화면은 휴대폰 기준 */
 
+/* 전체 화면 */
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background-color: #f8f9fa;
+    color: #222;
+}
+
+/* 기본 레이아웃 */
 .container {
     max-width: 480px; /* 휴대폰 폭 정도로 제한 */
     margin: 0 auto;   /* PC에서는 가운데 정렬 */
     padding: 16px;
+}
+
+/* 페이지 제목 */
+h1 {
+    font-size: 26px;
+    line-height: 1.5;
+    text-align: center;
+    margin: 32px 0;
+}
+
+/* 행사 목록 */
+#event-list {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+/* 행사 카드 */
+.event-card {
+    background-color: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 20px;
+    cursor: pointer;
+    transition: border-color 0.2s;
+	position: relative;
+}
+
+.event-card:hover {
+    border-color: #80a8e8;
+}
+
+/* 행사 이름 */
+.event-card h2 {
+    font-size: 18px;
+    margin: 0 0 12px;
+}
+
+/* 행사 정보 */
+.event-card p {
+    font-size: 14px;
+    line-height: 1.6;
+    margin: 8px 0;
+}
+
+/* 행사 상태 */
+.event-status {
+	position: absolute;
+	right: 16px;
+	bottom: 12px;
+	margin: 0;
+}
+
+.event-status.OPEN {
+    color: #16803c;
+}
+
+.event-status.UPCOMING {
+    color: #b76b00;
+}
+
+.event-status.CLOSED {
+    color: #777;
+}
+
+.sold-out {
+    color: #e53935;
+    font-weight: bold;
 }
