@@ -1,8 +1,18 @@
--- 테스트용 데이터 (담당: 변연경)
---
--- TODO
--- 행사 1개 (오픈 시간은 과거, 마감 시간은 미래로 해서 바로 신청 가능하게)
--- 옵션 2개 (예: 논비건 버거 정원 30, 비건 버거 정원 10)
--- 수령일 1~2개
--- 납부자(member) 여러 명 ← application.student_id가 member를 참조하므로
---   테스트에 쓸 학번은 모두 member에 있어야 신청이 저장됨
+USE coma_db;
+
+INSERT INTO event (event_id, name, open_at, close_at, closed)
+VALUES (1, '테스트 행사', '2026-11-20 00:00:00', '2026-12-31 23:59:59', FALSE);
+
+-- remaining은 생성 시 capacity와 같게
+INSERT INTO event_option (option_id, event_id, name, capacity, remaining)
+VALUES (1, 1, '옵션A', 30, 30),
+       (2, 1, '옵션B', 20, 20);
+
+INSERT INTO event_pickup_date (event_id, pickup_date)
+VALUES (1, '2026-12-01'),
+       (1, '2026-12-02');
+
+INSERT INTO member (student_id, name)
+VALUES ('2312345', '홍길동'),
+       ('2312346', '김철수'),
+       ('2312347', '이영희');
