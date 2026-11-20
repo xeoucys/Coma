@@ -42,6 +42,7 @@ h1 {
     padding: 20px;
     cursor: pointer;
     transition: border-color 0.2s;
+	position: relative;
 }
 
 .event-card:hover {
@@ -63,7 +64,10 @@ h1 {
 
 /* 행사 상태 */
 .event-status {
-    font-weight: bold;
+	position: absolute;
+	right: 16px;
+	bottom: 12px;
+	margin: 0;
 }
 
 .event-status.OPEN {
@@ -76,4 +80,9 @@ h1 {
 
 .event-status.CLOSED {
     color: #777;
+}
+
+.sold-out {
+    color: #e53935;
+    font-weight: bold;
 }

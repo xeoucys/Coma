@@ -6,8 +6,8 @@ const mockEvents = [
     {
         eventId: 1,
         name: "기말고사 간식 행사",
-        openAt: "2026-12-09T12:00:00",
-        closeAt: "2026-12-10T18:00:00",
+        openAt: "2026-12-09T12:00",
+        closeAt: "2026-12-10T18:00",
         status: "OPEN",
         options: [
             { optionId: 1, name: "논비건 버거", remaining: 12 },
@@ -60,7 +60,7 @@ function createEventCard(event) {
             option.remaining === 0
                 ? "품절"
                 : `${option.remaining}개 남음`;
-
+				remaining.classList.toggle("sold-out", option.remaining === 0);
         optionRow.append(optionName, remaining);
         card.appendChild(optionRow);
     });
@@ -105,6 +105,7 @@ function updateStock(message) {
                 message.remaining === 0
                     ? "품절"
                     : `${message.remaining}개 남음`;
+					option.classList.toggle("sold-out", message.remaining === 0);
         }
     });
 }
