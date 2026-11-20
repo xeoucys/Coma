@@ -9,6 +9,7 @@
 package com.coma.snack.dao;
 import java.util.List;
 
+import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
@@ -22,13 +23,8 @@ public class EventDao {
     private static final String SELECT_EVENT =
             "SELECT event_id, name, open_at, close_at, closed FROM event ";
 
-    private static final RowMapper<EventDto> EVENT_MAPPER = (rs, rowNum) -> new EventDto(
-            rs.getLong("event_id"),
-            rs.getString("name"),
-            rs.getTimestamp("open_at").toLocalDateTime(),
-            rs.getTimestamp("close_at").toLocalDateTime(),
-            rs.getBoolean("closed")
-    );
+    private static final RowMapper<EventDto> EVENT_MAPPER =
+            new BeanPropertyRowMapper<>(EventDto.class);
 
     private final JdbcTemplate jdbcTemplate;
 
@@ -37,6 +33,6 @@ public class EventDao {
     }
 
     public List<EventDto> findAll() {
-        return jdbcTemplate.query(SELECT_EVENT, EVENT_MAPPER);
+        return jdbcTemplate.query(SELECT_EVENT + "ORDER BY open_at DESC", EVENT_MAPPER);
     }
 }
