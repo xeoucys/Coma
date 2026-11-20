@@ -1,12 +1,77 @@
 package com.coma.snack.dto;
 
-/**
- * 신청 화면용 응답 - event.html (함께 정함)
- *
- * TODO 필드: eventId, name, openAt, closeAt, status, pickupDates, options
- * 필드 이름은 API 명세의 JSON 이름과 같게 한다.
- *
- * 설계: docs/design-system-structure.md 2-3
- */
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.List;
+
 public class EventDetailDto {
+	
+	private Long eventId;
+    private String name;
+    private LocalDateTime openAt;
+    private LocalDateTime closeAt;
+    private EventStatus status;
+    private List<LocalDate> pickupDates;
+    private List<OptionDto> options;
+
+    public EventDetailDto() {
+    }
+
+	public Long getEventId() {
+		return eventId;
+	}
+
+	public void setEventId(Long eventId) {
+		this.eventId = eventId;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	public LocalDateTime getOpenAt() {
+		return openAt;
+	}
+
+	public void setOpenAt(LocalDateTime openAt) {
+		this.openAt = openAt;
+	}
+
+	public LocalDateTime getCloseAt() {
+		return closeAt;
+	}
+
+	public void setCloseAt(LocalDateTime closeAt) {
+		this.closeAt = closeAt;
+	}
+
+	public EventStatus getStatus() {
+		return status;
+	}
+
+	public void setStatus(EventStatus status) {
+		this.status = status;
+	}
+
+	public List<LocalDate> getPickupDates() {
+		return pickupDates;
+	}
+
+	public void setPickupDates(List<LocalDate> pickupDates) {
+		this.pickupDates = pickupDates;
+	}
+
+	public List<OptionDto> getOptions() {
+		return options;
+	}
+
+	public void setOptions(List<OptionDto> options) {
+		this.options = options;
+	}
+    
+    
 }
