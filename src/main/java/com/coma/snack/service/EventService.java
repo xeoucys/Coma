@@ -1,17 +1,18 @@
 package com.coma.snack.service;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.springframework.stereotype.Service;
 
-/**
- * 행사 조회, 행사 상태 계산 (담당: 오지우)
- *
- * TODO
- * - getEvents(): List<EventSummaryDto>
- * - getEventDetail(Long eventId): EventDetailDto
- * - getStatus(EventDto event, LocalDateTime now): EventStatus
- *
- * 설계: docs/design-server-api.md 4-5
- */
+import com.coma.snack.dto.EventSummaryDto;
+
 @Service
 public class EventService {
+	
+    // TODO 서버 3번: EventDao, OptionDao로 조회하고 getStatus()로 상태 계산
+    public List<EventSummaryDto> getEvents() {
+        return new ArrayList<>();
+    }
+    
 }
