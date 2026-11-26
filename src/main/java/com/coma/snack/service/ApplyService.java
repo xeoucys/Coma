@@ -53,6 +53,22 @@ public class ApplyService {
             throw new ApplyException(ErrorCode.CLOSED);
         }
 
-        return null; // 작업 2에서 완성
+        // 4. 이미 신청한 학생인지
+        if (applicationDao.exists(eventId, req.getStudentId())) {
+            throw new ApplyException(ErrorCode.DUPLICATE);
+        }
+
+        // 5. 저장
+        Long applicationId = applicationDao.insert(eventId, req);
+
+        // 6. 성공 응답
+        ApplyResponse response = new ApplyResponse();
+        response.setSuccess(true);
+        response.setCode("SUCCESS");
+        response.setMessage("신청이 완료되었습니다.");
+        response.setApplicationId(applicationId);
+        response.setOptionId(option.getOptionId());
+        // TODO 10단계: 정원 차감 후 남은 수량(remaining) 넣기
+        return response;
     }
 }
