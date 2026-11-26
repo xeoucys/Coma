@@ -13,6 +13,8 @@ import com.coma.snack.dto.EventDetailDto;
 import com.coma.snack.dto.EventDto;
 import com.coma.snack.dto.EventStatus;
 import com.coma.snack.dto.EventSummaryDto;
+import com.coma.snack.exception.ApplyException;
+import com.coma.snack.exception.ErrorCode;
 
 
 @Service
@@ -60,7 +62,7 @@ public class EventService {
     public EventDetailDto getEventDetail(Long eventId) {
         EventDto event = eventDao.findById(eventId);
         if (event == null) {
-            return null;   // 없는 행사
+            throw new ApplyException(ErrorCode.EVENT_NOT_FOUND);
         }
 
         EventDetailDto detail = new EventDetailDto();
