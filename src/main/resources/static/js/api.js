@@ -6,13 +6,25 @@ async getEvents(){
 	return await response.json();
 }
 // 신청 화면용 행사 정보 조회
-async getEvent(int eventId){
+async getEvent(eventId){
 	const response = await fetch(`/api/events/${eventId}`);
 	
 	return await response.json();
 }
-// - apply(eventId, request)   → POST /api/events/{eventId}/applications
-//
+// 행사 신청
+async function apply(eventId, request){
+	const response = await fetch(`/api/events/${eventId}/applications`,
+		{
+			method: "POST";
+			headers: {
+				"Content-Type": "application/json";
+			},
+			body: JSON.Stringify(request)
+		}
+	);
+	
+	return await response.json();
+}
 // 2순위 이후
 // - getMyApplications(studentId, name) → GET /api/applications
 // - 관리자 API (/api/admin/...)
