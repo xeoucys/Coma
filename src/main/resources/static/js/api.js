@@ -2,6 +2,11 @@
 //
 // TODO 1순위
 // - getEvents()               → GET  /api/events             (index.html)
+async getEvents(){
+	const response = await fetch("/api/events");
+	
+	return await response.json();
+}
 // - getEvent(eventId)         → GET  /api/events/{eventId}   (event.html)
 // - apply(eventId, request)   → POST /api/events/{eventId}/applications
 //
