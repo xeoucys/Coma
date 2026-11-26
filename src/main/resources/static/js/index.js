@@ -19,8 +19,8 @@ const mockEvents = [
 // 2. 행사 상태별 안내 문구
 const statusMessages = {
     OPEN: "신청 가능",
-    UPCOMING: "아직 신청기간이 아닙니다.",
-    CLOSED: "신청이 마감된 행사입니다."
+    UPCOMING: "진행 예정",
+    CLOSED: "신청 마감"
 };
 
 // 3. 행사 카드 생성
@@ -148,6 +148,3 @@ window.addEventListener("socket-reconnected", async () => {
         console.error("행사 목록 갱신 실패:", error);
     }
 });
-
-// 9. 초기 화면 출력 (임시 데이터)
-renderEvents(mockEvents);

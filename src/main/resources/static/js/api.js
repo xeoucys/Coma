@@ -1,12 +1,12 @@
 
 // 행사 목록과 옵션별 남은 수량 조회
-async getEvents(){
+async function getEvents(){
 	const response = await fetch("/api/events");
 	
 	return await response.json();
 }
 // 신청 화면용 행사 정보 조회
-async getEvent(eventId){
+async function getEvent(eventId){
 	const response = await fetch(`/api/events/${eventId}`);
 	
 	return await response.json();
@@ -15,9 +15,9 @@ async getEvent(eventId){
 async function apply(eventId, request){
 	const response = await fetch(`/api/events/${eventId}/applications`,
 		{
-			method: "POST";
+			method: "POST",
 			headers: {
-				"Content-Type": "application/json";
+				"Content-Type": "application/json"
 			},
 			body: JSON.Stringify(request)
 		}
