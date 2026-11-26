@@ -3,7 +3,10 @@ package com.coma.snack.service;
 import java.time.LocalDateTime;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.coma.snack.dao.ApplicationDao;
 import com.coma.snack.dao.EventDao;
@@ -31,6 +34,7 @@ public class ApplyService {
     @Autowired
     private EventService eventService;
 
+    @Transactional
     public ApplyResponse apply(Long eventId, ApplyRequest req) {
         // 1. 행사가 있는지
         EventDto event = eventDao.findById(eventId);
@@ -58,17 +62,33 @@ public class ApplyService {
             throw new ApplyException(ErrorCode.DUPLICATE);
         }
 
-        // 5. 저장
-        Long applicationId = applicationDao.insert(eventId, req);
+        // 5. 정원 차감: 남은 수량이 있을 때만 1 줄어듦
+        int updated = optionDao.decreaseRemaining(req.getOptionId());
+        if (updated == 0) {
+            throw new ApplyException(ErrorCode.SOLD_OUT);
+        }
 
-        // 6. 성공 응답
+        // 6. 저장
+        Long applicationId;
+        try {
+            applicationId = applicationDao.insert(eventId, req);
+        } catch (DuplicateKeyException e) {
+            // UNIQUE(student_id, event_id) 위반
+            throw new ApplyException(ErrorCode.DUPLICATE);
+        } catch (DataIntegrityViolationException e) {
+            // 외래키 위반 -- 행사에 없는 수령일, member에 없는 학번
+            throw new ApplyException(ErrorCode.INVALID_INPUT);
+        }
+
+        // 7. 성공 응답
         ApplyResponse response = new ApplyResponse();
         response.setSuccess(true);
         response.setCode("SUCCESS");
         response.setMessage("신청이 완료되었습니다.");
         response.setApplicationId(applicationId);
         response.setOptionId(option.getOptionId());
-        // TODO 10단계: 정원 차감 후 남은 수량(remaining) 넣기
+        OptionDto after = optionDao.findById(req.getOptionId());
+        response.setRemaining(after.getRemaining());
         return response;
     }
 }
