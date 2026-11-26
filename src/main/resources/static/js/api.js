@@ -1,13 +1,16 @@
-// 서버 요청 공통 함수 (담당: 서유정)
-//
-// TODO 1순위
-// - getEvents()               → GET  /api/events             (index.html)
+
+// 행사 목록과 옵션별 남은 수량 조회
 async getEvents(){
 	const response = await fetch("/api/events");
 	
 	return await response.json();
 }
-// - getEvent(eventId)         → GET  /api/events/{eventId}   (event.html)
+// 신청 화면용 행사 정보 조회
+async getEvent(int eventId){
+	const response = await fetch(`/api/events/${eventId}`);
+	
+	return await response.json();
+}
 // - apply(eventId, request)   → POST /api/events/{eventId}/applications
 //
 // 2순위 이후
