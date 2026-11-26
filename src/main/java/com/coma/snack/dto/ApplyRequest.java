@@ -1,12 +1,56 @@
 package com.coma.snack.dto;
 
-/**
- * 신청 요청 (화면 → 서버) (함께 정함)
- *
- * TODO 필드: studentId, name, phone, optionId, pickupDate
- * 필드 이름은 API 명세의 JSON 이름과 같게 한다.
- *
- * 설계: docs/design-system-structure.md 2-3
- */
+import java.time.LocalDate;
+
 public class ApplyRequest {
+	
+	private String studentId; // 학번
+    private String name; // 이름
+    private String phone; // 전화번호
+    private Long optionId; // 선택한 옵션 번호
+    private LocalDate pickupDate; // 선택한 수령일
+
+    public ApplyRequest() {
+    }
+
+	public String getStudentId() {
+		return studentId;
+	}
+
+	public void setStudentId(String studentId) {
+		this.studentId = studentId;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	public String getPhone() {
+		return phone;
+	}
+
+	public void setPhone(String phone) {
+		this.phone = phone;
+	}
+
+	public Long getOptionId() {
+		return optionId;
+	}
+
+	public void setOptionId(Long optionId) {
+		this.optionId = optionId;
+	}
+
+	public LocalDate getPickupDate() {
+		return pickupDate;
+	}
+
+	public void setPickupDate(LocalDate pickupDate) {
+		this.pickupDate = pickupDate;
+	}
+
 }
