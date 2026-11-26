@@ -1,10 +1,12 @@
 package com.coma.snack.websocket;
 
+import java.io.IOException;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.CloseStatus;
+import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
 
@@ -32,5 +34,24 @@ public class StockWebSocketHandler extends TextWebSocketHandler {
     @Override
     public void handleTransportError(WebSocketSession session, Throwable exception) {
         sessions.remove(session);
+    }
+    
+    // 모든 접속자에게 같은 메시지 보내기
+    public void broadcast(String json) {
+        TextMessage message = new TextMessage(json);
+
+        for (WebSocketSession session : sessions) {
+            if (!session.isOpen()) { // 이미 끊긴 연결은 제외
+                sessions.remove(session);
+                continue;
+            }
+            try {
+                synchronized (session) { // 한 연결에 두 메시지를 동시에 보내지 않도록
+                    session.sendMessage(message);
+                }
+            } catch (IOException e) {
+                sessions.remove(session);
+            }
+        }
     }
 }
