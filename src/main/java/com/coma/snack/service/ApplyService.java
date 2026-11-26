@@ -3,6 +3,8 @@ package com.coma.snack.service;
 import java.time.LocalDateTime;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -67,7 +69,16 @@ public class ApplyService {
         }
 
         // 6. 저장
-        Long applicationId = applicationDao.insert(eventId, req);
+        Long applicationId;
+        try {
+            applicationId = applicationDao.insert(eventId, req);
+        } catch (DuplicateKeyException e) {
+            // UNIQUE(student_id, event_id) 위반
+            throw new ApplyException(ErrorCode.DUPLICATE);
+        } catch (DataIntegrityViolationException e) {
+            // 외래키 위반 -- 행사에 없는 수령일, member에 없는 학번
+            throw new ApplyException(ErrorCode.INVALID_INPUT);
+        }
 
         // 7. 성공 응답
         ApplyResponse response = new ApplyResponse();
