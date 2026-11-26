@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.coma.snack.dao.ApplicationDao;
@@ -34,7 +35,7 @@ public class ApplyService {
     @Autowired
     private EventService eventService;
 
-    @Transactional
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public ApplyResponse apply(Long eventId, ApplyRequest req) {
         // 1. 행사가 있는지
         EventDto event = eventDao.findById(eventId);
