@@ -19,7 +19,7 @@ async function apply(eventId, request){
 			headers: {
 				"Content-Type": "application/json"
 			},
-			body: JSON.Stringify(request)
+			body: JSON.stringify(request)
 		}
 	);
 	

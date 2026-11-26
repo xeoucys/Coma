@@ -22,7 +22,9 @@
     <script src="js/index.js"></script>
 	
 	<script>
-		renderEvents(mockEvents);
+		getEvents()
+			.then(events => renderEvents(events))
+			.catch(error => console.error(error));
 	</script>
 </body>
 </html>
