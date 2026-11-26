@@ -76,7 +76,8 @@ public class ApplyService {
         response.setMessage("신청이 완료되었습니다.");
         response.setApplicationId(applicationId);
         response.setOptionId(option.getOptionId());
-        // TODO 10단계: 정원 차감 후 남은 수량(remaining) 넣기
+        OptionDto after = optionDao.findById(req.getOptionId());
+        response.setRemaining(after.getRemaining());
         return response;
     }
 }
