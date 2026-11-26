@@ -45,4 +45,11 @@ public class OptionDao {
              jdbcTemplate.query(SELECT_OPTION + "WHERE option_id = ?", OPTION_MAPPER, optionId);
      return list.isEmpty() ? null : list.get(0);
  }
+ 
+ public int decreaseRemaining(Long optionId) {
+     String sql = "UPDATE event_option SET remaining = remaining - 1 "
+                + "WHERE option_id = ? AND remaining > 0";
+     return jdbcTemplate.update(sql, optionId);
+ }
+ 
 }
