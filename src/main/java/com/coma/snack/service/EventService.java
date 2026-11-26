@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 
 import com.coma.snack.dao.EventDao;
 import com.coma.snack.dao.OptionDao;
+import com.coma.snack.dto.EventDetailDto;
 import com.coma.snack.dto.EventDto;
 import com.coma.snack.dto.EventStatus;
 import com.coma.snack.dto.EventSummaryDto;
@@ -53,5 +54,23 @@ public class EventService {
             return EventStatus.CLOSED;     // 마감 시각이 지남
         }
         return EventStatus.OPEN;           // 진행 중
+    }
+    
+ // 행사 정보 GET -- /api/events/{eventId}
+    public EventDetailDto getEventDetail(Long eventId) {
+        EventDto event = eventDao.findById(eventId);
+        if (event == null) {
+            return null;   // 없는 행사
+        }
+
+        EventDetailDto detail = new EventDetailDto();
+        detail.setEventId(event.getEventId());
+        detail.setName(event.getName());
+        detail.setOpenAt(event.getOpenAt());
+        detail.setCloseAt(event.getCloseAt());
+        detail.setStatus(getStatus(event, LocalDateTime.now()));
+        detail.setPickupDates(eventDao.findPickupDates(eventId));
+        detail.setOptions(optionDao.findByEventId(eventId));
+        return detail;
     }
 }
