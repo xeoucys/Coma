@@ -26,7 +26,7 @@ public class EventController {
     
  // 신청 화면용 행사 정보 (event.html)
     @GetMapping("/{eventId}")
-    public EventDetailDto getEvent(@PathVariable Long eventId) {
+    public EventDetailDto getEvent(@PathVariable("eventId") Long eventId) {
         return eventService.getEventDetail(eventId);
     }
     
