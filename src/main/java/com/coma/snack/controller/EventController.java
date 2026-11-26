@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import com.coma.snack.dto.*;
@@ -21,6 +22,12 @@ public class EventController {
     @GetMapping
     public List<EventSummaryDto> getEvents() {
         return eventService.getEvents();
+    }
+    
+ // 신청 화면용 행사 정보 (event.html)
+    @GetMapping("/{eventId}")
+    public EventDetailDto getEvent(@PathVariable Long eventId) {
+        return eventService.getEventDetail(eventId);
     }
     
 }
