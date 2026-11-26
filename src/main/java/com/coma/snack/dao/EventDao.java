@@ -7,6 +7,7 @@
  * - findPickupDates(Long eventId): List<LocalDate>
  */
 package com.coma.snack.dao;
+import java.time.LocalDate;
 import java.util.List;
 
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
@@ -34,5 +35,19 @@ public class EventDao {
 
     public List<EventDto> findAll() {
         return jdbcTemplate.query(SELECT_EVENT + "ORDER BY open_at DESC", EVENT_MAPPER);
+    }
+    
+    public EventDto findById(Long eventId) {
+    	List<EventDto> list = jdbcTemplate.query(
+                SELECT_EVENT + "WHERE event_id = ?", EVENT_MAPPER, eventId);
+    	return list.isEmpty() ? null : list.get(0);
+    }
+    
+    public List<LocalDate> findPickupDates(Long eventId) {
+        return jdbcTemplate.query(
+                "SELECT pickup_date FROM event_pickup_date "
+                        + "WHERE event_id = ? ORDER BY pickup_date",
+                (rs, rowNum) -> rs.getDate("pickup_date").toLocalDate(),
+                eventId);
     }
 }
