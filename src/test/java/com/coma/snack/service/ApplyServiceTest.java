@@ -107,4 +107,31 @@ class ApplyServiceTest {
         start.countDown();   // 출발 신호: 모든 스레드가 동시에 출발
         done.await();        // 모든 스레드가 끝날 때까지 기다리기
     }
+
+    @Test
+    void 정원1에_10명_동시신청하면_1명만_성공() throws InterruptedException {
+        jdbcTemplate.update("UPDATE event_option SET remaining = 1 WHERE option_id = ?", OPTION_ID);
+
+        String[] studentIds = new String[10];
+        for (int i = 0; i < 10; i++) {
+            studentIds[i] = "990000" + i;
+        }
+        applyAtOnce(studentIds);
+
+        assertEquals(1, success.get());
+        assertEquals(9, soldOut.get());
+        assertEquals(0, getRemaining());
+    }
+
+    @Test
+    void 같은학번으로_5번_동시신청하면_1번만_성공() throws InterruptedException {
+        jdbcTemplate.update("UPDATE event_option SET remaining = 10 WHERE option_id = ?", OPTION_ID);
+
+        String[] studentIds = { "9900000", "9900000", "9900000", "9900000", "9900000" };
+        applyAtOnce(studentIds);
+
+        assertEquals(1, success.get());
+        assertEquals(4, duplicate.get());
+        assertEquals(9, getRemaining());   // 실패한 4번은 롤백되어 1만 줄어야 함
+    }
 }
