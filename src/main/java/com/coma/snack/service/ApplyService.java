@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.coma.snack.dao.ApplicationDao;
 import com.coma.snack.dao.EventDao;
@@ -31,6 +32,7 @@ public class ApplyService {
     @Autowired
     private EventService eventService;
 
+    @Transactional
     public ApplyResponse apply(Long eventId, ApplyRequest req) {
         // 1. 행사가 있는지
         EventDto event = eventDao.findById(eventId);
@@ -58,10 +60,16 @@ public class ApplyService {
             throw new ApplyException(ErrorCode.DUPLICATE);
         }
 
-        // 5. 저장
+        // 5. 정원 차감: 남은 수량이 있을 때만 1 줄어듦
+        int updated = optionDao.decreaseRemaining(req.getOptionId());
+        if (updated == 0) {
+            throw new ApplyException(ErrorCode.SOLD_OUT);
+        }
+
+        // 6. 저장
         Long applicationId = applicationDao.insert(eventId, req);
 
-        // 6. 성공 응답
+        // 7. 성공 응답
         ApplyResponse response = new ApplyResponse();
         response.setSuccess(true);
         response.setCode("SUCCESS");
