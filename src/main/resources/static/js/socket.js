@@ -1,8 +1,73 @@
-// WebSocket 연결, 수량 갱신 (담당: 서유정)
-//
-// TODO
-// - ws://서버주소/ws/stock 연결
-// - {"type":"STOCK", ...} 받으면 현재 페이지의 해당 옵션 수량 갱신, 0이면 품절 표시
-// - 연결이 끊기면 "서버와 연결이 끊어졌습니다." 안내, 3초마다 재연결
-// - 재연결되면 최신 수량 다시 조회 (index.html: getEvents, event.html: getEvent)
-// 메시지 형식: docs/design-server-api.md 4-6
+function connectWebSocket() {
+
+    let socket;
+    let reconnectTimer;
+    let disconnected = false;
+
+    function connect() {
+
+        const protocol =
+            location.protocol === "https:" ? "wss:" : "ws:";
+
+        socket = new WebSocket(
+            `${protocol}//${location.host}/ws/stock`
+        );
+
+        // 연결 성공
+        socket.onopen = () => {
+            console.log("WebSocket 연결 성공");
+
+            clearTimeout(reconnectTimer);
+
+            if (disconnected) {
+                disconnected = false;
+
+                window.dispatchEvent(
+                    new CustomEvent("socket-reconnected")
+                );
+            }
+        };
+
+        // 서버 메시지 수신
+        socket.onmessage = (event) => {
+            try {
+                const message = JSON.parse(event.data);
+
+                if (message.type === "STOCK" ||
+                    message.type === "CLOSED") {
+
+                    window.dispatchEvent(
+                        new CustomEvent("socket-message", {
+                            detail: message
+                        })
+                    );
+                }
+
+            } catch (error) {
+                console.error("메시지 처리 오류:", error);
+            }
+        };
+
+        // 연결 끊김
+        socket.onclose = () => {
+            disconnected = true;
+
+            window.dispatchEvent(
+                new CustomEvent("socket-disconnected", {
+                    detail: "서버와 연결이 끊어졌습니다."
+                })
+            );
+
+            clearTimeout(reconnectTimer);
+
+            reconnectTimer = setTimeout(connect, 3000);
+        };
+
+        // 연결 오류
+        socket.onerror = (error) => {
+            console.error("WebSocket 연결 오류:", error);
+        };
+    }
+
+    connect();
+}
