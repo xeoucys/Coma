@@ -99,7 +99,7 @@ function createEventCard(event) {
 			return;
 		}
 		
-		window.location.href = `event.html?eventId=${encodeURIComponenet(event.eventId)}`;
+		window.location.href = `event.html?eventId=${encodeURIComponent(event.eventId)}`;
 	})
 	
     return card;
@@ -182,11 +182,20 @@ window.addEventListener("socket-reconnected", async () => {
     try {
         const events = await getEvents();
         renderEvents(events);
-        document.getElementById("connection-message")
-            .textContent = "";
+        document.getElementById("connection-status").hidden = true;
     } catch (error) {
         console.error("행사 목록 갱신 실패:", error);
-        document.getElementById("connection-message")
-            .textContent = "최신 행사 정보를 불러오지 못했습니다.";
+
+        const status = document.getElementById("connection-status");
+        status.textContent = "최신 행사 정보를 불러오지 못했습니다.";
+        status.hidden = false;
     }
 });
+
+// 9. WebSocket 연결 끊김 안내
+window.addEventListener("socket-disconnected", event => {
+    const status = document.getElementById("connection-status");
+    status.textContent = event.detail;
+    status.hidden = false;
+});
+connectWebSocket();

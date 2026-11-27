@@ -95,3 +95,10 @@ h1 {
     color: #e53935;
     font-weight: bold;
 }
+
+/* 서버 연결 끊김 안내 */
+#connection-status {
+    color: red;
+    font-size: 14px;
+    text-align: center;
+}
