@@ -1,12 +1,46 @@
 package com.coma.snack.dto;
 
-/**
- * WebSocket 메시지 (함께 정함)
- *
- * TODO 필드: type, eventId, optionId, remaining
- * 필드 이름은 API 명세의 JSON 이름과 같게 한다.
- *
- * 설계: docs/design-system-structure.md 2-3
- */
 public class StockMessage {
+
+    private String type; //stock
+    private Long eventId;
+    private Long optionId;
+    private int remaining;
+
+    public StockMessage() {
+    }
+
+	public String getType() {
+		return type;
+	}
+
+	public void setType(String type) {
+		this.type = type;
+	}
+
+	public Long getEventId() {
+		return eventId;
+	}
+
+	public void setEventId(Long eventId) {
+		this.eventId = eventId;
+	}
+
+	public Long getOptionId() {
+		return optionId;
+	}
+
+	public void setOptionId(Long optionId) {
+		this.optionId = optionId;
+	}
+
+	public int getRemaining() {
+		return remaining;
+	}
+
+	public void setRemaining(int remaining) {
+		this.remaining = remaining;
+	}
+
+    
 }
