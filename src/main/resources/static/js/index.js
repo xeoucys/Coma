@@ -87,18 +87,20 @@ function createEventCard(event) {
         card.appendChild(optionRow);
     });
 
-	if(event.status === "UPCOMING" || event.status === "CLOSED"){
-		const cover = document.createElement("div");
-		cover.className = "card-cover";
-		card.appendChild(cover);
-	}else{
-		// 행사 상세 페이지 이동
-		card.addEventListener("click", () => {
-		    window.location.href =
-		        `event.html?eventId=${encodeURIComponent(event.eventId)}`;
-		});
-		
+	if (event.status === "UPCOMING" || event.status === "CLOSED") {
+	    const cover = document.createElement("div");
+	    cover.className = "card-cover";
+	    card.appendChild(cover);
 	}
+	
+	card.addEventListener("click", () => {
+		
+		if(!status.classList.contains("OPEN")){
+			return;
+		}
+		
+		window.location.href = `event.html?eventId=${encodeURIComponenet(event.eventId)}`;
+	})
 	
     return card;
 }
@@ -147,11 +149,18 @@ function closeEvent(message) {
 
     cards.forEach(card => {
         if (card.dataset.eventId === String(message.eventId)) {
+
             const status = card.querySelector(".event-status");
 
             if (status) {
                 status.className = "event-status CLOSED";
                 status.textContent = statusMessages.CLOSED;
+            }
+            // 마감된 행사에 커버 추가
+            if (!card.querySelector(".card-cover")) {
+                const cover = document.createElement("div");
+                cover.className = "card-cover";
+                card.appendChild(cover);
             }
         }
     });
@@ -173,7 +182,11 @@ window.addEventListener("socket-reconnected", async () => {
     try {
         const events = await getEvents();
         renderEvents(events);
+        document.getElementById("connection-message")
+            .textContent = "";
     } catch (error) {
         console.error("행사 목록 갱신 실패:", error);
+        document.getElementById("connection-message")
+            .textContent = "최신 행사 정보를 불러오지 못했습니다.";
     }
 });
