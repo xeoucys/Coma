@@ -1,0 +1,292 @@
+/* ========================================
+   event.html - 간식 신청 화면
+======================================== */
+
+body.event-page {
+    margin: 0;
+    padding: 0;
+    background-color: #f2f2f2;
+    font-family: "Noto Sans KR", Arial, sans-serif;
+    color: #222;
+}
+
+.event-page * {
+    box-sizing: border-box;
+}
+
+/* 전체 신청 화면 */
+.event-page .container {
+    width: 100%;
+    max-width: 480px;
+    min-height: 100vh;
+
+    margin: 0 auto;
+    padding: 0;
+
+    background-color: #ffffff;
+    border-radius: 0;
+    box-shadow: none;
+
+    display: flex;
+    flex-direction: column;
+}
+
+/* 행사 제목 영역 */
+.event-page .event-title {
+    min-height: 90px;
+    padding: 24px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-bottom: 1px solid #333;
+}
+
+.event-page #event-name {
+    margin: 0;
+    font-size: 24px;
+    font-weight: 600;
+    text-align: center;
+}
+
+/* 행사 안내문 영역 */
+.event-page #event-info {
+    min-height: 240px;
+    padding: 20px 26px;
+
+    display: flex;
+    flex-direction: column;
+
+    border-bottom: 1px solid #333;
+}
+
+.event-page #event-description {
+    flex: 1;
+    margin: 0 0 20px;
+
+    font-size: 14px;
+    line-height: 1.8;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+}
+
+.event-page #event-period {
+    margin: 10px 0;
+
+    font-size: 12px;
+    line-height: 1.6;
+    color: #666;
+}
+
+.event-page .required-notice {
+    margin: 8px 0 0;
+    font-size: 12px;
+    color: #d93025;
+}
+
+/* 신청 폼 */
+.event-page #apply-form {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+
+    margin: 0;
+    padding: 0;
+}
+
+/* 질문 영역 및 디바이더 */
+.event-page .form-card {
+    margin: 0;
+    padding: 26px;
+
+    background-color: #ffffff;
+
+    border: none;
+    border-bottom: 1px solid #333;
+    border-radius: 0;
+    box-shadow: none;
+}
+
+/* 질문 제목 */
+.event-page .form-card > label,
+.event-page .form-card > h3 {
+    display: block;
+
+    margin: 0 0 24px;
+
+    font-size: 16px;
+    font-weight: 500;
+    line-height: 1.5;
+}
+
+/* 필수 질문 표시 */
+.event-page .required {
+    color: #d93025;
+    font-size: 14px;
+}
+
+/* 주관식 입력창 */
+.event-page input[type="text"],
+.event-page input[type="tel"] {
+    display: block;
+
+    width: 75%;
+    margin: 0 0 6px 12px;
+    padding: 10px 0;
+
+    background-color: transparent;
+
+    border: none;
+    border-bottom: 1px solid #555;
+    border-radius: 0;
+
+    outline: none;
+    box-shadow: none;
+
+    font-family: inherit;
+    font-size: 14px;
+    color: #222;
+}
+
+.event-page input::placeholder {
+    color: #999;
+}
+
+/* 입력창 선택 시 */
+.event-page input[type="text"]:focus,
+.event-page input[type="tel"]:focus {
+    border-bottom: 2px solid #333;
+}
+
+/* 옵션과 수령일 목록 - 세로 배치 */
+.event-page #option-list,
+.event-page #pickup-date-list {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+/* 라디오 버튼 한 줄 */
+.event-page .radio-item {
+    display: flex;
+    align-items: center;
+
+    width: 100%;
+    margin: 0;
+    padding: 0 4px;
+    gap: 10px;
+
+    font-size: 13px;
+    cursor: pointer;
+}
+
+/* 라디오 버튼 */
+.event-page .radio-item input[type="radio"] {
+    width: 18px;
+    height: 18px;
+
+    margin: 0;
+
+    flex-shrink: 0;
+    accent-color: #555;
+    cursor: pointer;
+}
+
+/* 옵션명 */
+.event-page #option-list .radio-item > span:nth-child(2) {
+    white-space: nowrap;
+}
+
+/* 옵션명과 잔여 수량 사이 점선 */
+.event-page #option-list .radio-item::after {
+    content: "";
+
+    flex: 1;
+    min-width: 10px;
+
+    border-bottom: 1px dashed #777;
+
+    order: 1;
+}
+
+/* 잔여 수량 - 오른쪽 정렬 */
+.event-page .remaining {
+    order: 2;
+
+    margin-left: 0;
+
+    font-size: 12px;
+    color: #333;
+    white-space: nowrap;
+}
+
+/* 품절 표시 */
+.event-page .remaining.sold-out {
+    color: #d93025;
+}
+
+.event-page .radio-item.disabled {
+    color: #999;
+    cursor: not-allowed;
+}
+
+.event-page .radio-item input:disabled {
+    cursor: not-allowed;
+}
+
+/* 신청 버튼 영역 */
+.event-page .apply-area {
+    flex: 1;
+
+    min-height: 160px;
+    padding: 40px 0 24px;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    align-items: center;
+}
+
+/* 신청 버튼 */
+.event-page #apply-button {
+    display: block;
+
+    width: 80%;
+    min-height: 42px;
+    padding: 8px 16px;
+
+    background-color: #c0c0c0;
+    color: #111;
+
+    border: 1px solid #333;
+    border-radius: 12px;
+
+    font-family: inherit;
+    font-size: 18px;
+    font-weight: 500;
+
+    cursor: pointer;
+}
+
+.event-page #apply-button:not(:disabled):hover {
+    background-color: #adadad;
+}
+
+.event-page #apply-button:disabled {
+    background-color: #e0e0e0;
+    color: #999;
+    cursor: not-allowed;
+}
+
+/* 오류 메시지 */
+.event-page #message {
+    margin: 12px 20px 0;
+    font-size: 13px;
+    text-align: center;
+    color: #d93025;
+}
+
+.event-page #message:empty {
+    display: none;
+}

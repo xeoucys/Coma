@@ -1,29 +1,102 @@
 <!DOCTYPE html>
 <html lang="ko">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>간식 신청</title>
-    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/event.css">
 </head>
-<body>
-    <!-- 간식 신청 (1순위, 담당: 서유정) - UI: event.html -->
-    <main class="container">
-        <!-- TODO: 행사 안내문 -->
-        <section id="event-info"></section>
 
-        <!-- TODO: 신청 폼
-             - 학번, 이름, 전화번호 입력
-             - 옵션 선택 (하나만 고르므로 라디오 버튼, 품절 옵션은 선택 불가)
-             - 수령일 선택
-             GET /api/events/{eventId} 응답의 options, pickupDates로 선택지를 만든다 -->
+<body class="event-page">
+    <main class="container">
+        <!-- 행사 제목 -->
+        <header class="event-title">
+            <h1 id="event-name"></h1>
+        </header>
+
+        <!-- 행사 안내문 -->
+        <section id="event-info">
+            <p id="event-description"></p>
+            <p id="event-period"></p>
+            <p class="required-notice">* 필수 질문</p>
+        </section>
+
+        <!-- 신청 폼 -->
         <form id="apply-form">
-            <button type="submit" id="apply-button">간식 신청하기</button>
+
+            <!-- 학번 -->
+            <section class="form-card">
+                <label for="student-id">
+                    학번 <span class="required">*</span>
+                </label>
+                <input type="text"
+                       id="student-id"
+                       name="studentId"
+                       placeholder="내 답변"
+                       inputmode="numeric"
+                       pattern="[0-9]{7}"
+                       maxlength="7"
+                       required>
+            </section>
+
+            <!-- 이름 -->
+            <section class="form-card">
+                <label for="student-name">
+                    이름 <span class="required">*</span>
+                </label>
+                <input type="text"
+                       id="student-name"
+                       name="name"
+                       placeholder="내 답변"
+                       required>
+            </section>
+
+            <!-- 전화번호 -->
+            <section class="form-card">
+                <label for="phone">
+                    전화번호 <span class="required">*</span>
+                </label>
+                <input type="tel"
+                       id="phone"
+                       name="phone"
+                       placeholder="010-0000-0000"
+                       required>
+            </section>
+
+            <!-- 간식 옵션 -->
+            <section class="form-card">
+                <h3>
+                    간식 옵션 선택
+                    <span class="required">*</span>
+                </h3>
+                <div id="option-list"></div>
+            </section>
+
+            <!-- 수령일 -->
+            <section class="form-card">
+                <h3>
+                    수령일 선택
+                    <span class="required">*</span>
+                </h3>
+                <div id="pickup-date-list"></div>
+            </section>
+
+            <!-- 신청 버튼 -->
+            <div class="apply-area">
+                <button type="submit"
+                        id="apply-button"
+                        disabled>
+                    간식 신청하기
+                </button>
+                <p id="message" role="status"></p>
+            </div>
         </form>
     </main>
 
     <script src="js/api.js"></script>
     <script src="js/socket.js"></script>
     <script src="js/event.js"></script>
+
 </body>
 </html>
