@@ -43,6 +43,7 @@ h1 {
     cursor: pointer;
     transition: border-color 0.2s;
 	position: relative;
+	overflow: hidden;
 }
 
 .event-card:hover {
@@ -62,6 +63,14 @@ h1 {
     margin: 8px 0;
 }
 
+/* 신청 불가 행사 커버 */
+.card-cover {
+	position: absolute;
+	inset: 0;
+	background-color: rgba(0, 0, 0, 0.5);
+	border-radius: inherit;
+	z-index: 10;
+}
 /* 행사 상태 */
 .event-status {
 	position: absolute;

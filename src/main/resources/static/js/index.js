@@ -8,12 +8,34 @@ const mockEvents = [
         name: "기말고사 간식 행사",
         openAt: "2026-12-09T12:00",
         closeAt: "2026-12-10T18:00",
-        status: "OPEN",
+        status: "CLOSED",
         options: [
             { optionId: 1, name: "논비건 버거", remaining: 12 },
             { optionId: 2, name: "비건 버거", remaining: 0 }
         ]
-    }
+    },
+	{
+	        eventId: 2,
+	        name: "기말고사 간식 행사",
+	        openAt: "2026-12-09T12:00",
+	        closeAt: "2026-12-10T18:00",
+	        status: "OPEN",
+	        options: [
+	            { optionId: 1, name: "논비건 버거", remaining: 12 },
+	            { optionId: 2, name: "비건 버거", remaining: 0 }
+	        ]
+	    },
+		{
+		        eventId: 3,
+		        name: "기말고사 간식 행사",
+		        openAt: "2026-12-09T12:00",
+		        closeAt: "2026-12-10T18:00",
+		        status: "UPCOMING",
+		        options: [
+		            { optionId: 1, name: "논비건 버거", remaining: 12 },
+		            { optionId: 2, name: "비건 버거", remaining: 0 }
+		        ]
+		    }
 ];
 
 // 2. 행사 상태별 안내 문구
@@ -65,12 +87,19 @@ function createEventCard(event) {
         card.appendChild(optionRow);
     });
 
-    // 행사 상세 페이지 이동
-    card.addEventListener("click", () => {
-        window.location.href =
-            `event.html?eventId=${encodeURIComponent(event.eventId)}`;
-    });
-
+	if(event.status === "UPCOMING" || event.status === "CLOSED"){
+		const cover = document.createElement("div");
+		cover.className = "card-cover";
+		card.appendChild(cover);
+	}else{
+		// 행사 상세 페이지 이동
+		card.addEventListener("click", () => {
+		    window.location.href =
+		        `event.html?eventId=${encodeURIComponent(event.eventId)}`;
+		});
+		
+	}
+	
     return card;
 }
 
